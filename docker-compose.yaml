@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  php-server:
+    container_name: php-server
+    networks:
+      - faesa-challenge-net
+    build:
+      context: ./php-server
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: mysql:8
+    networks:
+      - faesa-challenge-net
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dbsample
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - "3306:3306"
+      - "33060:33060"
+    volumes:
+      - db-config:/etc/mysql
+      - db-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: always
+    networks:
+      - faesa-challenge-net
+    ports:
+      - 8000:80
+    environment:
+      MYSQL_DATABASE: dbsample
+      MYSQL_TCP_PORT: 3306
+    depends_on:
+      - db
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - faesa-challenge-net
+    ports:
+      - "9000:9000"
+
+volumes:
+  db-config:
+  db-data:
+
+networks:
+  faesa-challenge-net:
